@@ -8,5 +8,5 @@ import '@fontsource/manrope/600.css';
 import '@fontsource/manrope/700.css';
 import '@fontsource/manrope/800.css';
 import './globals.css';
-export const metadata:Metadata={title:'WhatsApp Marketplace — Prototype',description:'Chat, discover, and shop. A messaging-first marketplace with an integrated demo wallet.'};
+export const metadata:Metadata={title:'WhatsApp Marketplace',description:'Chat, discover, and shop in an independent messaging-first marketplace with an integrated wallet.'};
 export default function Layout({children}:{children:React.ReactNode}) {return <html lang="en"><body>{children}</body></html>;}

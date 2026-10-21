@@ -1,7 +1,6 @@
-# Demo profile pictures
+# Bundled profile pictures
 
-Generated with the built-in image-generation tool. These are fictional people and do not identify real WhatsApp users. All seven PNG assets are bundled in `public/avatars/` for offline demo use. Prompts:
-
+Generated with the built-in image-generation tool. These are fictional people seeded for the local walkthrough and do not identify real users. All seven PNG assets are bundled in `public/avatars/` for offline demo use. Prompts:
 - **ada.png**: Use case: photorealistic-natural. Asset type: square profile photo for a fictional Nigerian demo user in a messaging app. Subject: a Nigerian woman in her late twenties, dark skin, neat shoulder-length braids, rust-coloured blouse, soft sage backdrop. Natural friendly smile, looking into camera, realistic skin texture, soft daylight. Close head-and-shoulders framing, entire head comfortably inside central 65% for circular avatar crop. Simple softly blurred studio backdrop. One person only, no text, no logo, no watermark. This is a fictional person, not a real public figure.
 
 - **tunde.png**: Use case: photorealistic-natural. Asset type: square profile photo for a fictional Nigerian demo user in a messaging app. Subject: a Nigerian man in his early thirties, dark skin, short natural hair, clean shaven, navy casual shirt, soft blue-grey backdrop. Natural friendly smile, looking into camera, realistic skin texture, soft daylight. Close head-and-shoulders framing, entire head comfortably inside central 65% for circular avatar crop. Simple softly blurred studio backdrop. One person only, no text, no logo, no watermark. This is a fictional person, not a real public figure.
@@ -16,3 +15,23 @@ Generated with the built-in image-generation tool. These are fictional people an
 
 - **peter.png**: Use case: photorealistic-natural. Asset type: square profile photo for a fictional Nigerian demo user in a messaging app. Subject: a Nigerian man in his early thirties, dark skin, close-cropped hair, neat moustache and beard, burgundy casual shirt, soft sand backdrop. Natural friendly smile, looking into camera, realistic skin texture, soft daylight. Close head-and-shoulders framing, entire head comfortably inside central 65% for circular avatar crop. Simple softly blurred studio backdrop. One person only, no text, no logo, no watermark. This is a fictional person, not a real public figure.
 
+## Product imagery
+
+Product photos are openly licensed images from Wikimedia Commons, downloaded through the Commons API, centre-cropped to a 4:3 card (800 × 600) and re-encoded at quality 82. Nothing was scraped from retail or social sites, and no copyrighted image is used without a licence. The seller's own description, price and condition remain the authoritative listing; photos illustrate the product type rather than the exact item.
+
+| File | Listing | Author | Licence | Source |
+| --- | --- | --- | --- | --- |
+| `products/cable.jpg` | Braided USB-C cable | Fructibus | CC0 | [Commons](https://commons.wikimedia.org/wiki/File:USB-C_cable_2017_A.jpg) |
+| `products/headphones.jpg` | Everyday wireless headphones | RPSkokie | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File:Sony_WH-CH510_Bluetooth_Over-Ear_Headphone.jpg) |
+| `products/phone.jpg` | Pocket smartphone | Ka Kit & Google | CC BY-SA 3.0 de | [Commons](https://commons.wikimedia.org/wiki/File:Smartphone_Samsung_Galaxy.jpg) |
+| `products/tote.jpg` | The everyday canvas tote | Tom Beatty | CC BY 2.0 | [Commons](https://commons.wikimedia.org/wiki/File:Canvas_two-tone_tote_Navy_and_Natural7_(9038437258).jpg) |
+| `products/sneakers.jpg` | Off-duty sneakers | JustinLiang522 | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File:A_pair_of_white_shoes.jpg) |
+| `products/shirt.jpg` | Relaxed cotton tee | Pajju12 | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File:Clean-blank-shirt-hanger.jpg) |
+| `products/lamp.jpg` | Little table lamp | Tangerineduel | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File:1950s_Ceramic_Bedside_Lamps_pair-3.jpg) |
+| `products/plant.jpg` | A little green companion | PattayaPatrol | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File:DFC_2281_Two_small_potted_cacti_with_rounded_clustered_forms_sit_side_by_side_on_a_windowsill_a_calm_seaside_view_blurred_in_the_background.jpg) |
+| `products/basket-goods.jpg` | Pantry pasta bundle | LUAMNG aharmz | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File:HK_food_ingredient_texture_of_Alberto_Poiatti_Italian_brand_%E7%9B%B4%E9%80%9A%E7%B2%89_penne_rigate_yellow_September_2021_SS2_02.jpg) |
+| `products/tomatoes.jpg` | Fresh tomatoes | Inyor4mr | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File:Basket_of_Fresh_Tomatoes_package_for_sale.jpg) |
+| `products/rice.jpg` | Jollof & chicken combo | Queen Murja10 | CC BY-SA 4.0 | [Commons](https://commons.wikimedia.org/wiki/File:Ghana_Jollof_Rice_with_Chicken.jpg) |
+| `products/drink.jpg` | Fresh citrus drink | USDA / Arad | Public domain | [Commons](https://commons.wikimedia.org/wiki/File:Orange_juice_1_edit1.jpg) |
+
+Each listing also stores its author, licence and source URL in the `products` table; the product detail dialog shows that credit and links back to the Commons file page. User-created listings without a photo keep the emoji-and-colour fallback.

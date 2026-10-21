@@ -5,7 +5,8 @@ The full WhatsApp baseline remains required under the blueprint. This is a famil
 | Capability | State | Evidence / remaining work |
 | --- | --- | --- |
 | Chats-first responsive shell | Implemented | Browser smoke checks cover desktop and phone navigation |
-| Registered/demo identity | Implemented locally | Remembered demo-user selection, Nigerian names and bundled fictional profile pictures; optional test registration; no live WhatsApp identity integration |
+| Account identity | Implemented locally | Standard sign-in and account creation; local walkthrough profiles are seeded with credentials outside production; Nigerian names and bundled fictional profile pictures; no live WhatsApp identity integration |
+| First-visit orientation | Implemented | Dismissible map card after the first sign-in and a seven-step tour covering chats, marketplace, selling, orders, wallet, business tools and the assistant; replay available in Settings |
 | Contacts and direct-thread uniqueness | Implemented | SQLite tests and two-session browser messaging |
 | Signed encrypted personal/business text | Prototype | OpenPGP.js client envelopes; server rejects plaintext submissions |
 | Key lifecycle, device verification, forward secrecy | Pending | Local keys, no recovery, linking or rotation; security review needed |
@@ -20,13 +21,16 @@ The full WhatsApp baseline remains required under the blueprint. This is a famil
 | Device sync, backups, restoration/transfer | Pending | Requires platform design |
 | Existing assistant/personalisation baseline | Pending | Reference platform inventory needed |
 | General marketplace | Implemented | Products across categories; seller/product/city search and category filter |
+| Guided marketplace discovery | Implemented | Niche cards narrow the catalogue to a themed suggestion set; search and category filters clear the niche and remain independent |
+| Catalogue photography | Implemented | Twelve seeded listings use openly licensed Wikimedia Commons photos with author, licence and source stored per product and credited in the detail dialog; user listings keep the emoji fallback |
 | Direct personal selling | Implemented | Sell something → product form → automatic seller profile on first listing; no separate seller signup |
 | Seller onboarding | Implemented | Full shop onboarding remains available in Business tools; default pickup |
 | Seller configuration | Partial | Product creation, price and availability; profile editing and delivery-zone management pending |
-| Contextual ordering assistant | Implemented with limits | Local matching; optional live AI; only explicitly typed context shared; manual ordering works independently |
+| Contextual ordering assistant | Implemented with limits | Server-validated catalogue IDs, quantities and duplicates; only catalogue/cart/typed request sent to the provider; configurable timeout; local fallback is labelled with its reason; manual ordering works independently |
+| Request hardening and security headers | Implemented (prototype) | Cross-site/origin rejection, JSON-only writes, 100 KB cap, rate limits, hashed session tokens, HttpOnly SameSite cookies, production CSP and standard headers, no-store APIs; in-memory limits and TLS/proxy setup remain deployment work |
 | Quotes and checkout in seller chat | Implemented | Integer pricing, ownership, expiry and idempotency tests |
-| Username payment addresses and person-to-person transfers | Implemented | Unique immutable usernames, exact recipient confirmation, atomic once-only debit/credit, shared chat receipt and counterpart history; test funds only |
-| Demo wallet and ledger | Implemented | Balanced entries, append-only ledger, top-up/retry and reconciliation tests |
+| Username payment addresses and person-to-person transfers | Implemented | Unique immutable usernames, exact recipient confirmation, atomic once-only debit/credit, shared chat receipt and counterpart history; simulated wallet credit only |
+| Simulated wallet and ledger | Implemented | Balanced entries, append-only ledger, top-up/retry and reconciliation tests |
 | Order fulfilment, refund and settlement | Implemented | Seller permissions, allowed transitions, once-only terminal effects |
 | Supabase/Postgres deployment, RLS | Pending | First implementation uses local SQLite; migrations and hosted deployment remain required work |
 

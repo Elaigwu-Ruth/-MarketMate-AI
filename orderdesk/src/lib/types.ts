@@ -1,6 +1,6 @@
 export type User = { username: string; avatar_url?: string; id: string; name: string; initials: string; color: string; public_key: string | null; demo: number };
 export type Vendor = { id: string; owner_id: string; name: string; category: string; city: string; description: string; initials: string; color: string; accepting: number; published: number; address: string };
-export type Product = { id: string; vendor_id: string; name: string; category: string; description: string; condition: string; attributes: string; price: number; available: number; archived: number; emoji: string; color: string };
+export type Product = { id: string; vendor_id: string; name: string; category: string; description: string; condition: string; attributes: string; price: number; available: number; archived: number; emoji: string; color: string; image_url?: string | null; image_credit?: string | null; image_source?: string | null };
 export type Message = { id: string; thread_id: string; sender_id: string; kind: 'encrypted'|'system'|'order'|'transfer'; body: string; created_at: string };
 export type Thread = { id: string; kind: string; vendor_id: string | null; name: string; initials: string; color: string; other_id: string; unread: number; latest: string; updated_at: string; members: User[]; avatar_url?:string };
 export type CartItem = { product_id: string; quantity: number };
