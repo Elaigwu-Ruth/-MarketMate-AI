@@ -1,36 +1,63 @@
-import {test,expect} from '@playwright/test';
+import {test,expect,type Page} from '@playwright/test';
+
+async function signInAs(page:Page,userId:string){
+ const response=await page.request.post('/api/auth/demo',{data:{user_id:userId}});
+ expect(response.ok()).toBe(true);
+ await page.goto('/');
+ await expect(page.getByRole('heading',{name:'Chats',exact:true})).toBeVisible();
+}
 
 test('two sessions exchange encrypted texts, then customer pays and seller fulfils one order',async({browser})=>{
  test.setTimeout(120000);
  const a=await browser.newContext({viewport:{width:1440,height:1000}}),b=await browser.newContext({viewport:{width:1440,height:1000}}),c=await browser.newContext();
  const customer=await a.newPage(),friend=await b.newPage(),seller=await c.newPage();
  const errors:string[]=[];customer.on('pageerror',e=>errors.push(e.message));
- await customer.goto('/');await customer.getByRole('button',{name:/Ada Okafor/}).click();await expect(customer.getByRole('heading',{name:'Chats'})).toBeVisible();
- await friend.goto('/');await friend.getByRole('button',{name:/Tunde Bello/}).click();await expect(friend.getByRole('heading',{name:'Chats'})).toBeVisible();
+ await signInAs(customer,'ada');
+ await signInAs(friend,'tunde');
  await customer.getByRole('button',{name:/Tunde Bello/}).click();await customer.getByRole('textbox',{name:'Message',exact:true}).fill('Hello Tunde, ready for the showcase?');await customer.getByRole('button',{name:'Send message'}).click();
  await expect(customer.getByText('Hello Tunde, ready for the showcase?',{exact:true})).toBeVisible();await friend.getByRole('button',{name:/Ada Okafor/}).click();await expect(friend.getByText('Hello Tunde, ready for the showcase?',{exact:true})).toBeVisible({timeout:15000});
  await friend.getByRole('textbox',{name:'Message',exact:true}).fill('Ready. Let’s find something good.');await friend.getByRole('button',{name:'Send message'}).click();await expect(customer.getByText('Ready. Let’s find something good.',{exact:true})).toBeVisible({timeout:15000});
  const threads=await customer.request.get('/api/threads');const thread=(await threads.json()).threads.find((t:{name:string})=>t.name==='Tunde Bello');const saved=await customer.request.get(`/api/threads/${thread.id}/messages`);const ciphertext=(await saved.json()).messages.find((m:{kind:string})=>m.kind==='encrypted');expect(ciphertext.body).toContain('-----BEGIN PGP MESSAGE-----');expect(ciphertext.body).not.toContain('Hello Tunde');
  const outsider=await seller.request.get(`/api/threads/${thread.id}/messages`);expect(outsider.status()).toBe(401);const privateAssistant=await customer.request.post('/api/assistant',{data:{thread_id:thread.id,prompt:'Read this conversation',items:[]}});expect(privateAssistant.status()).toBe(400);
- await customer.getByRole('button',{name:'Marketplace',exact:true}).click();await expect(customer.getByRole('heading',{name:'Marketplace',exact:true})).toBeVisible();await customer.screenshot({path:'/tmp/orderdesk-marketplace-desktop.png',fullPage:true});
- await customer.getByRole('button',{name:'Add Braided USB-C cable',exact:true}).click();await customer.getByRole('button',{name:/1 items/}).click();await expect(customer.getByRole('dialog',{name:'Review your order'})).toBeVisible();await customer.getByRole('button',{name:'Add one Braided USB-C cable',exact:true}).click();await customer.getByRole('button',{name:'Review server-priced quote'}).click();await expect(customer.getByRole('button',{name:'Confirm & pay ₦4,000'})).toBeVisible();await customer.getByRole('button',{name:'Confirm & pay ₦4,000'}).click();await expect(customer.getByText('Demo payment held · test funds',{exact:true})).toBeVisible();await customer.screenshot({path:'/tmp/orderdesk-chat-order-desktop.png'});
- await seller.goto('/');await seller.getByRole('button',{name:/Chidi Nwosu/}).click();await seller.getByRole('button',{name:'Business tools',exact:true}).click();for(const label of ['Accept order','Mark preparing','Mark ready','Mark completed']){await test.step(label,async()=>{const response=seller.waitForResponse(r=>r.url().endsWith('/transition')&&r.request().method()==='POST');await seller.getByRole('button',{name:label,exact:true}).click();const r=await response;expect(r.ok(),await r.text()).toBe(true);});}await expect(customer.getByText('Demo payment settled · test funds',{exact:true})).toBeVisible({timeout:15000});
+ await customer.getByRole('button',{name:'Marketplace',exact:true}).click();await expect(customer.getByRole('heading',{name:'Marketplace',exact:true})).toBeVisible();await expect(customer.locator('.product-photo')).toHaveCount(12);expect(await customer.locator('.product-photo').first().evaluate((img:HTMLImageElement)=>img.naturalWidth)).toBeGreaterThan(0);await customer.screenshot({path:'/tmp/orderdesk-marketplace-desktop.png',fullPage:true});
+ await customer.getByRole('button',{name:'Add Braided USB-C cable',exact:true}).click();await customer.getByRole('button',{name:/1 items/}).click();await expect(customer.getByRole('dialog',{name:'Review your order'})).toBeVisible();await customer.getByRole('button',{name:'Add one Braided USB-C cable',exact:true}).click();await customer.getByRole('button',{name:'Review server-priced quote'}).click();await expect(customer.getByRole('button',{name:'Confirm & pay ₦4,000'})).toBeVisible();await customer.getByRole('button',{name:'Confirm & pay ₦4,000'}).click();await expect(customer.getByText('Payment held · simulated wallet',{exact:true})).toBeVisible();await customer.screenshot({path:'/tmp/orderdesk-chat-order-desktop.png'});
+ await signInAs(seller,'tech');await seller.getByRole('button',{name:'Business tools',exact:true}).click();for(const label of ['Accept order','Mark preparing','Mark ready','Mark completed']){await test.step(label,async()=>{const response=seller.waitForResponse(r=>r.url().endsWith('/transition')&&r.request().method()==='POST');await seller.getByRole('button',{name:label,exact:true}).click();const r=await response;expect(r.ok(),await r.text()).toBe(true);});}await expect(customer.getByText('Payment settled · simulated wallet',{exact:true})).toBeVisible({timeout:15000});
  const w=await customer.request.get('/api/wallet');expect((await w.json()).balance).toBe(1100000);
- await customer.reload();await expect(customer.getByRole('heading',{name:'Chats'})).toBeVisible();await customer.getByRole('button',{name:/Circuit House/}).click();await expect(customer.getByText('Demo payment settled · test funds',{exact:true})).toBeVisible();
+ await customer.reload();await expect(customer.getByRole('heading',{name:'Chats'})).toBeVisible();await customer.getByRole('button',{name:/Circuit House/}).click();await expect(customer.getByText('Payment settled · simulated wallet',{exact:true})).toBeVisible();
  await customer.getByRole('button',{name:'Order assistant',exact:true}).click();await customer.getByPlaceholder('e.g. Two USB-C cables under ₦6,000').fill('Two USB-C cables under ₦6,000');await customer.getByRole('button',{name:'Prepare order',exact:true}).click();await expect(customer.getByText('Catalogue assistant · local matching',{exact:true})).toBeVisible();await customer.getByRole('button',{name:'Review editable order',exact:true}).click();await expect(customer.getByRole('dialog',{name:'Review your order'})).toBeVisible();await customer.getByRole('button',{name:'Close dialog',exact:true}).click();await customer.getByPlaceholder('e.g. Two USB-C cables under ₦6,000').fill('Make it three in total');await customer.getByRole('button',{name:'Prepare order',exact:true}).click();await expect(customer.getByText('3 × Braided USB-C cable',{exact:true})).toBeVisible();
  expect(errors).toEqual([]);await a.close();await b.close();await c.close();
 });
 
 test('a new seller publishes a non-food product and phone layout stays within the viewport',async({page})=>{
- await page.setViewportSize({width:390,height:844});await page.goto('/');await page.getByRole('button',{name:'Create account',exact:true}).click();await page.getByLabel('Your name').fill('Demo Maker');await page.getByLabel('Email', {exact:true}).fill(`maker-${Date.now()}@example.com`);await page.getByLabel('Password', {exact:true}).fill('showcase-password');await page.getByRole('button',{name:'Create your account'}).click();await expect(page.getByRole('heading',{name:'Chats'})).toBeVisible();
+ await page.setViewportSize({width:390,height:844});await page.goto('/');await page.getByRole('button',{name:'Create account',exact:true}).click();await page.getByLabel('Your name').fill('Demo Maker');await page.getByLabel('Email', {exact:true}).fill(`maker-${Date.now()}@example.com`);await page.getByLabel('Password', {exact:true}).fill('showcase-password');await page.getByLabel('Confirm password', {exact:true}).fill('showcase-password');await page.getByRole('button',{name:'Create your account'}).click();await expect(page.getByRole('heading',{name:'Chats'})).toBeVisible();
  await page.getByRole('button',{name:'Business tools',exact:true}).click();await page.getByRole('button',{name:'Become a seller',exact:true}).click();await page.getByLabel('Business name').fill('Made by You');await page.getByLabel('City',{exact:true}).fill('Abuja');await page.getByLabel('Category',{exact:true}).selectOption('Fashion');await page.getByLabel('About your shop').fill('Handmade accessories for your everyday.');await page.getByLabel('Pickup address').fill('Demo Street, Abuja');await page.getByLabel('First product name').fill('Handmade wristband');await page.getByLabel('Price (NGN)').fill('2500');await page.getByLabel('Attributes (size, colour, compatibility)').fill('Adjustable · Blue');await page.getByRole('button',{name:'Publish your shop'}).click();await expect(page.getByRole('heading',{name:'Made by You.'})).toBeVisible();
  await page.getByRole('button',{name:'Marketplace',exact:true}).click();await page.getByRole('textbox',{name:'Search marketplace'}).fill('wristband');await expect(page.getByRole('button',{name:'Handmade wristband',exact:true})).toBeVisible();await page.screenshot({path:'/tmp/orderdesk-marketplace-mobile.png',fullPage:true});expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
 });
 
-test('profile username sends test funds directly to a friend and both sessions receive a receipt',async({browser})=>{
+test('a new account signs out, signs back in and can replay the welcome tour',async({page})=>{
+ const email=`signin-${Date.now()}@example.com`;
+ await page.goto('/');await page.getByRole('button',{name:'Create account',exact:true}).click();
+ await page.getByLabel('Your name').fill('Returning Visitor');await page.getByLabel('Email',{exact:true}).fill(email);await page.getByLabel('Password',{exact:true}).fill('showcase-password');await page.getByLabel('Confirm password',{exact:true}).fill('showcase-password');await page.getByRole('button',{name:'Create your account'}).click();
+ await expect(page.getByRole('heading',{name:'Chats',exact:true})).toBeVisible();
+ await expect(page.getByRole('region',{name:'Getting started'})).toBeVisible();
+ await page.getByRole('button',{name:'Take the tour'}).click();
+ await expect(page.getByRole('dialog')).toBeVisible();
+ await page.getByRole('button',{name:'Next',exact:true}).click();
+ await expect(page.getByRole('dialog')).toContainText('Start with a niche');
+ await page.getByRole('button',{name:'Close tour'}).click();
+ await page.getByRole('button',{name:'Your profile'}).click();await page.getByRole('button',{name:'Sign out'}).click();
+ await expect(page.getByRole('heading',{name:'Sign in'})).toBeVisible();
+ await page.getByLabel('Email').fill(email);await page.getByLabel('Password').fill('showcase-password');await page.getByRole('button',{name:'Sign in',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Chats',exact:true})).toBeVisible();
+ await expect(page.getByRole('region',{name:'Getting started'})).toHaveCount(0);
+ await page.getByRole('button',{name:'Your profile'}).click();await page.getByRole('button',{name:'Take the welcome tour'}).click();
+ await expect(page.getByRole('dialog')).toBeVisible();await page.getByRole('button',{name:'Skip tour'}).click();
+});
+
+test('profile username sends wallet credit directly to a friend and both sessions receive a receipt',async({browser})=>{
  test.setTimeout(120000);const a=await browser.newContext(),b=await browser.newContext();const sender=await a.newPage(),recipient=await b.newPage();
- await sender.goto('/');await sender.getByRole('button',{name:/Ada Okafor/}).click();await expect(sender.getByRole('heading',{name:'Chats',exact:true})).toBeVisible();
- await recipient.goto('/');await recipient.getByRole('button',{name:/Tunde Bello/}).click();await expect(recipient.getByRole('heading',{name:'Chats',exact:true})).toBeVisible();
+ await signInAs(sender,'ada');
+ await signInAs(recipient,'tunde');
  const beforeA=(await (await sender.request.get('/api/wallet')).json()).balance,beforeB=(await (await recipient.request.get('/api/wallet')).json()).balance;
  await sender.getByRole('button',{name:/Tunde Bello/}).click();await sender.getByRole('button',{name:'View contact profile',exact:true}).click();const profile=sender.getByRole('dialog',{name:'Contact profile'});await expect(profile.getByText('Tunde Bello',{exact:true})).toBeVisible();await profile.getByRole('button',{name:'Send money by username'}).click();
  const dialog=sender.getByRole('dialog',{name:'Send money',exact:true});await dialog.getByLabel('Amount (NGN)').fill('2000.50');await dialog.getByLabel('Note (optional)').fill('For your transport');await dialog.getByRole('button',{name:'Review transfer'}).click();await expect(dialog.getByText('@tunde',{exact:true})).toBeVisible();await sender.screenshot({path:'/tmp/orderdesk-transfer-review.png'});
@@ -41,9 +68,23 @@ test('profile username sends test funds directly to a friend and both sessions r
  await a.close();await b.close();
 });
 
-test('any demo user can publish directly from Sell something without a seller signup',async({page})=>{
- await page.setViewportSize({width:390,height:844});await page.goto('/');const demo=await (await page.request.get('/api/auth/demo-users')).json();expect(demo.users).toHaveLength(7);for(const u of demo.users){expect(u.name).not.toContain('·');expect((await page.request.get(u.avatar_url)).status()).toBe(200);}
- await page.getByRole('button',{name:/Tunde Bello/}).click();await expect(page.getByRole('heading',{name:'Chats',exact:true})).toBeVisible();await page.getByRole('banner').getByRole('button',{name:'Sell something',exact:true}).click();const dialog=page.getByRole('dialog',{name:'Sell something',exact:true});await dialog.getByLabel('What are you selling?').fill('Nokia demo phone');await dialog.getByLabel('Price (NGN)').fill('12500');await dialog.getByLabel('Category',{exact:true}).selectOption('Electronics');await dialog.getByLabel('Condition',{exact:true}).selectOption('Used');await dialog.getByLabel('Description',{exact:true}).fill('A working second-hand demo phone with a charger.');await dialog.getByLabel('Size, colour or specifications').fill('Black · Dual SIM');await dialog.getByLabel('City',{exact:true}).fill('Makurdi');await dialog.getByLabel('Pickup location').fill('Campus main gate');await dialog.getByRole('button',{name:'Publish listing'}).click();await expect(page.getByRole('heading',{name:'Tunde Bello.'})).toBeVisible();
- await page.getByRole('button',{name:'Marketplace',exact:true}).click();await page.getByRole('textbox',{name:'Search marketplace'}).fill('Nokia demo');await expect(page.getByRole('button',{name:'Nokia demo phone',exact:true})).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:'/tmp/orderdesk-direct-listing-mobile.png'});
- const business=await (await page.request.get('/api/business')).json();expect(business.vendor.city).toBe('Makurdi');expect(business.products.some((p:{name:string})=>p.name==='Nokia demo phone')).toBe(true);
+test('any signed-in user can publish directly from Sell something without a seller signup',async({page})=>{
+ await page.setViewportSize({width:390,height:844});const demo=await (await page.request.get('/api/auth/demo-users')).json();expect(demo.users).toHaveLength(7);for(const u of demo.users){expect(u.name).not.toContain('·');expect((await page.request.get(u.avatar_url)).status()).toBe(200);}
+ await signInAs(page,'tunde');await page.getByRole('banner').getByRole('button',{name:'Sell something',exact:true}).click();const dialog=page.getByRole('dialog',{name:'Sell something',exact:true});await dialog.getByLabel('What are you selling?').fill('Nokia phone');await dialog.getByLabel('Price (NGN)').fill('12500');await dialog.getByLabel('Category',{exact:true}).selectOption('Electronics');await dialog.getByLabel('Condition',{exact:true}).selectOption('Used');await dialog.getByLabel('Description',{exact:true}).fill('A working second-hand phone with a charger.');await dialog.getByLabel('Size, colour or specifications').fill('Black · Dual SIM');await dialog.getByLabel('City',{exact:true}).fill('Makurdi');await dialog.getByLabel('Pickup location').fill('Campus main gate');await dialog.getByRole('button',{name:'Publish listing'}).click();await expect(page.getByRole('heading',{name:'Tunde Bello.'})).toBeVisible();
+ await page.getByRole('button',{name:'Marketplace',exact:true}).click();await page.getByRole('textbox',{name:'Search marketplace'}).fill('Nokia');await expect(page.getByRole('button',{name:'Nokia phone',exact:true})).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:'/tmp/orderdesk-direct-listing-mobile.png'});
+ const business=await (await page.request.get('/api/business')).json();expect(business.vendor.city).toBe('Makurdi');expect(business.products.some((p:{name:string})=>p.name==='Nokia phone')).toBe(true);
 });
+
+test('production responses emit security headers and API responses are not cached',async({request})=>{
+ const page=await request.get('/');const headers=page.headers();
+ expect(headers['x-content-type-options']).toBe('nosniff');
+ expect(headers['x-frame-options']).toBe('DENY');
+ expect(headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
+ expect(headers['content-security-policy']).toContain("default-src 'self'");
+ expect(headers['content-security-policy']).toContain("frame-ancestors 'none'");
+ const api=await request.get('/api/auth/demo-users');
+ expect(api.status()).toBe(200);
+ expect(api.headers()['cache-control']).toContain('no-store');
+ expect(api.headers()['x-content-type-options']).toBe('nosniff');
+});
+
